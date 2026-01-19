@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="faq-container">
+    <h1>❓ Frequently Asked Questions</h1>
+
+    <div class="faq-section">
+        <h2>About TablesAlive.com</h2>
+        <details>
+            <summary>What is TablesAlive.com?</summary>
+            <p>TablesAlive.com is a powerful tool designed to bring your static Google Sheets data to life. It
+                transforms
+                raw data into interactive dashboards, visualizations, and analytical tools without writing a single line
+                of
+                code.</p>
+        </details>
+        <details>
+            <summary>Is it free to use?</summary>
+            <p>Yes, the core features of TablesAlive.com are currently free to use. We aim to provide accessible data
+                visualization for everyone.</p>
+        </details>
+    </div>
+
+    <div class="faq-section">
+        <h2>Features</h2>
+        <details>
+            <summary>Can I visualize my data?</summary>
+            <p>Absolutely! You can create various charts including Bar, Line, Scatter, Pie, Area, and Histograms using
+                the
+                'Visualization' section.</p>
+        </details>
+        <details>
+            <summary>Can I filter and group my data?</summary>
+            <p>Yes. Use the 'Data Tools' section to rename columns, apply complex filters (Numeric, Date, Categorical),
+                and
+                group data by specific fields with aggregation functions.</p>
+        </details>
+        <details>
+            <summary>Does it support real-time updates?</summary>
+            <p>The dashboard fetches the latest data from your Google Sheet whenever you click 'Refresh Now' in the
+                sidebar.
+            </p>
+        </details>
+    </div>
+
+    <div class="faq-section">
+        <h2>Support</h2>
+        <details>
+            <summary>How can I suggest a feature?</summary>
+            <p>We love feedback! Please reach out to us via the contact methods on our website or open an issue on our
+                public repository if available.</p>
+        </details>
+        <details>
+            <summary>I found a bug, what should I do?</summary>
+            <p>Please verify that your Google Sheet is public and the URL/GID are correct. If the issue persists,
+                contact
+                support with details about the error message.</p>
+        </details>
+    </div>
+</div>
+{% endblock %}

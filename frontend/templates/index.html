@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-header">
+    <h1>📈 Make Your Tables Alive</h1>
+</div>
+
+<div id="initial-state">
+    <div class="info-box">
+        👈 Connect a public Google Sheet to start.
+    </div>
+    <div class="video-container">
+        <video autoplay loop muted playsinline width="100%">
+            <source src="/video.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+</div>
+
+<div id="loading-state" style="display: none;">
+    <div class="spinner"></div>
+    <p>Loading data...</p>
+</div>
+
+<div id="dashboard-state" style="display: none;">
+
+    <!-- Key Indicators -->
+    <details class="card-details">
+        <summary class="card-summary">
+            <h3>🔑 Key Indicators</h3>
+        </summary>
+        <div class="card-content">
+            <div class="controls-row">
+                <select id="metric-select" class="input-select"></select>
+            </div>
+            <div class="metrics-grid" id="metrics-display">
+                <!-- Metrics injected via JS -->
+            </div>
+        </div>
+    </details>
+
+    <!-- Data Tools -->
+    <details class="card-details">
+        <summary class="card-summary">
+            <h3>🛠️ Data Tools</h3>
+        </summary>
+        <div class="card-content">
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="tab-rename">📝 Rename</button>
+                <button class="tab-btn" data-tab="tab-filter">🔍 Filter</button>
+                <button class="tab-btn" data-tab="tab-data-types">🔢 Data Types</button>
+            </div>
+
+            <div id="tab-rename" class="tab-content active">
+                <p class="section-desc">Rename columns below:</p>
+                <div id="rename-container" class="grid-3"></div>
+            </div>
+
+            <div id="tab-filter" class="tab-content">
+                <div class="control-row">
+                    <select id="filter-col-select" class="input-select">
+                        <option>Select Column</option>
+                    </select>
+                    <button id="add-filter-btn" class="btn-secondary">Add Filter</button>
+                </div>
+                <div id="active-filters-container"></div>
+                <button id="apply-filters-btn" class="btn-primary" style="width:auto; margin-top:10px;">Apply
+                    Filters</button>
+            </div>
+
+            <div id="tab-data-types" class="tab-content">
+                <p class="section-desc">Change data types and convert numeric formats:</p>
+                <div id="data-types-container" class="grid-3"></div>
+                <button id="apply-data-types-btn" class="btn-primary" style="width:auto; margin-top:10px;">Apply Data Type Changes</button>
+            </div>
+        </div>
+    </details>
+
+    <!-- Visualization -->
+    <details class="card-details" open>
+        <summary class="card-summary">
+            <h3>📊 Visualization</h3>
+        </summary>
+        <div class="card-content">
+            <div class="viz-controls">
+                <div class="control-group">
+                    <label>Type</label>
+                    <select id="chart-type" class="input-select">
+                        <option value="bar">Bar</option>
+                        <option value="line">Line</option>
+                        <option value="scatter">Scatter</option>
+                        <option value="pie">Pie</option>
+                        <option value="histogram">Histogram</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>X Axis (Multiple)</label>
+                    <select id="x-axis" class="input-select" multiple style="height: 100px;"></select>
+                </div>
+                <div class="control-group">
+                    <label>Y Axis (Multiple)</label>
+                    <select id="y-axis" class="input-select" multiple style="height: 100px;"></select>
+                </div>
+                <div class="control-group">
+                    <label>Color</label>
+                    <select id="color-axis" class="input-select">
+                        <option value="">None</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Axis Range Controls -->
+            <div class="viz-controls" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 15px;">
+                <div class="control-group">
+                    <label>X-Axis Range</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="number" id="x-min" class="input-text" placeholder="Min" style="margin-bottom:0">
+                        <input type="number" id="x-max" class="input-text" placeholder="Max" style="margin-bottom:0">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Y-Axis Range</label>
+                    <div style="display: flex; gap: 5px;">
+                        <input type="number" id="y-min" class="input-text" placeholder="Min" style="margin-bottom:0">
+                        <input type="number" id="y-max" class="input-text" placeholder="Max" style="margin-bottom:0">
+                    </div>
+                </div>
+                <div class="control-group" style="display: flex; align-items: flex-end;">
+                    <button type="button" id="apply-ranges-btn" class="btn-secondary"
+                        style="height: 38px; width: 100%;">Apply Ranges</button>
+                </div>
+            </div>
+
+            <!-- Viz Grouping Controls -->
+            <details class="viz-grouping-details" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
+                <summary style="cursor: pointer; font-weight: 600; margin-bottom: 10px;">📊 Viz Grouping</summary>
+                <div class="viz-controls">
+                    <div class="control-group">
+                        <label>Group By Column:</label>
+                        <select id="group-by-select" class="input-select"></select>
+                    </div>
+                    <div class="control-group" id="period-row" style="display:none;">
+                        <label>Period (for dates):</label>
+                        <select id="group-period-select" class="input-select">
+                            <option value="">None</option>
+                            <option value="week">Week</option>
+                            <option value="month">Month</option>
+                            <option value="year">Year</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Metric Columns:</label>
+                        <select id="group-metric-select" class="input-select" multiple style="height:100px;"></select>
+                    </div>
+                    <div class="control-group">
+                        <label>Function:</label>
+                        <select id="group-func-select" class="input-select">
+                            <option value="sum">Sum</option>
+                            <option value="mean">Mean</option>
+                            <option value="count">Count</option>
+                            <option value="min">Min</option>
+                            <option value="max">Max</option>
+                        </select>
+                    </div>
+                    <div class="control-group" style="display: flex; align-items: flex-end;">
+                        <button id="apply-group-btn" class="btn-primary" style="height: 38px;">Apply Grouping</button>
+                    </div>
+                </div>
+            </details>
+            <div id="chart-container" style="height: 500px;"></div>
+        </div>
+    </details>
+
+    <!-- Data Grid -->
+    <details class="card-details">
+        <summary class="card-summary">
+            <h3>📋 Data Grid</h3>
+        </summary>
+        <div class="card-content">
+            <div id="column-reorder-section" style="margin-bottom: 20px;">
+                <button id="toggle-reorder-btn" class="btn-secondary">⚙️ Reorder Columns</button>
+                <div id="reorder-controls"
+                    style="display:none; margin-top:10px; padding:15px; background:#f9f9f9; border-radius:8px;">
+                    <p class="section-desc">Move columns up/down to change their order in the table:</p>
+                    <ul id="column-list" class="reorder-list"></ul>
+                    <button id="apply-reorder-btn" class="btn-primary" style="width:auto; margin-top:10px;">Apply New
+                        Order</button>
+                </div>
+            </div>
+
+            <!-- Table Grouping Controls -->
+            <details class="table-grouping-details" style="margin-bottom: 20px;">
+                <summary style="cursor: pointer; font-weight: 600; margin-bottom: 10px; background: #f9f9f9; padding: 10px; border-radius: 8px;">📋 Table Grouping</summary>
+                <div class="table-grouping-section" style="padding: 15px; background: #f9f9f9; border-radius: 8px;">
+                    <div class="control-group">
+                        <label>Group By Columns:</label>
+                        <select id="table-group-by-select" class="input-select" multiple style="height:100px;"></select>
+                    </div>
+                    <div class="control-group">
+                        <label>Metric Columns:</label>
+                        <select id="table-group-metric-select" class="input-select" multiple style="height:100px;"></select>
+                    </div>
+                    <div class="control-group" id="table-period-row" style="display:none;">
+                        <label>Period (for Dates):</label>
+                        <select id="table-group-period-select" class="input-select">
+                            <option value="">None</option>
+                            <option value="week">Weekly</option>
+                            <option value="month">Monthly</option>
+                            <option value="year">Yearly</option>
+                        </select>
+                    </div>
+                    <div class="control-group">
+                        <label>Function:</label>
+                        <select id="table-group-func-select" class="input-select">
+                            <option value="sum">Sum</option>
+                            <option value="mean">Mean</option>
+                            <option value="count">Count</option>
+                            <option value="min">Min</option>
+                            <option value="max">Max</option>
+                        </select>
+                    </div>
+                    <div class="control-group" style="display: flex; align-items: flex-end;">
+                        <button id="apply-table-group-btn" class="btn-primary" style="height: 38px;">Apply Table Grouping</button>
+                    </div>
+                </div>
+            </details>
+            <div class="table-responsive" id="data-table-container"></div>
+        </div>
+    </details>
+</div>
+{% endblock %}

@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend
+    container_name: sheets-backend-prod
+    restart: always
+    expose:
+      - "5000"
+    env_file:
+      - .env
+
+  frontend:
+    build: ./frontend
+    container_name: sheets-frontend-prod
+    restart: always
+    ports:
+      - "80:8501" # Public HTTP port
+    depends_on:
+      - backend
+    env_file:
+      - .env
+    # Removed volumes for production to ensure the container uses the baked-in code

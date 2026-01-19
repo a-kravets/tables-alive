@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make Your Tables Alive | TablesAlive.com</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Toggle Button -->
+        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle Sidebar">
+            <span class="toggle-icon">☰</span>
+        </button>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <h2>📍 Navigation</h2>
+            </div>
+            <nav>
+                <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Home</a>
+                <a href="/usecases" class="nav-link {% if request.url.path == '/usecases' %}active{% endif %}">Use Cases</a>
+                <a href="/pricing" class="nav-link {% if request.url.path == '/pricing' %}active{% endif %}">Pricing</a>
+                <a href="/faq" class="nav-link {% if request.url.path == '/faq' %}active{% endif %}">FAQ</a>
+            </nav>
+
+            <hr>
+
+            <div class="connection-section">
+                <h2>🔌 Connection</h2>
+                <!-- Input for URL -->
+                <label for="sheet_url">
+                    Google Sheet URL
+                    <span class="info-icon" title="Paste the full URL.">ℹ️</span>
+                </label>
+                <input type="text" id="sheet_url" placeholder="https://docs.google.com/..." class="input-text">
+                <br>
+                <label for="gid_input">
+                    Sheet GID (Numeric ID)
+                    <span class="info-icon" title="Numeric ID after 'gid='. Use '0' for default.">ℹ️</span>
+                </label>
+                <input type="text" id="gid_input" placeholder="0" class="input-text">
+
+                <hr>
+
+                <button id="load-data-btn" class="btn-primary" style="margin-bottom: 10px;">Load Data 🚀</button>
+                <br><br>
+                <button id="refresh-btn" class="btn-secondary">Refresh Now ⚡</button>
+                <small>May reset filters</small>
+            </div>
+
+            <hr>
+            <div class="sidebar-footer">
+                <a href="https://www.tablesalive.com/" target="_blank">☕ Buy me a coffee</a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            {% block content %}{% endblock %}
+
+            <footer class="footer">
+                <p>📊 Make Your Tables Alive | © 2026</p>
+                <p><a href="https://www.tablesalive.com/" target="_blank">www.tablesalive.com</a></p>
+            </footer>
+        </main>
+    </div>
+
+    <script src="/static/js/main.js"></script>
+</body>
+
+</html>
