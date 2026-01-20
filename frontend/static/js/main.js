@@ -277,14 +277,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Handle viz grouping details toggle
-    const vizGroupingDetails = document.querySelector('.viz-grouping-details');
-    if (vizGroupingDetails) {
-        vizGroupingDetails.addEventListener('toggle', (e) => {
-            groupConfig.enabled = e.target.open;
-            if (!e.target.open) processData();
-        });
-    }
+    // Viz grouping details toggle - only for expand/collapse, not enabling/disabling grouping
 
     if (btnApplyGroup) {
         btnApplyGroup.addEventListener("click", () => {
@@ -298,13 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Handle table grouping details toggle
-    const tableGroupingDetails = document.querySelector('.table-grouping-details');
-    if (tableGroupingDetails) {
-        tableGroupingDetails.addEventListener('toggle', (e) => {
-            tableGroupConfig.enabled = e.target.open;
-        });
-    }
+    // Table grouping details toggle - only for expand/collapse, not enabling/disabling grouping
 
     if (btnApplyTableGroup) {
         btnApplyTableGroup.addEventListener("click", () => {
@@ -656,11 +643,26 @@ document.addEventListener("DOMContentLoaded", () => {
             const typeSelect = colDiv.querySelector('.data-type-select');
             const numberOptions = colDiv.querySelector('.number-options');
             const formatSelect = colDiv.querySelector('.number-format-select');
+            const decimalsInput = colDiv.querySelector('.decimals-input');
+
+            // Function to show/hide decimals input based on format
+            const updateDecimalsVisibility = () => {
+                if (formatSelect.value === 'int') {
+                    decimalsInput.style.display = 'none';
+                } else {
+                    decimalsInput.style.display = 'block';
+                }
+            };
 
             typeSelect.addEventListener('change', (e) => {
                 const selectedType = e.target.value;
                 numberOptions.style.display = selectedType === 'number' ? 'block' : 'none';
+                if (selectedType === 'number') {
+                    updateDecimalsVisibility();
+                }
             });
+
+            formatSelect.addEventListener('change', updateDecimalsVisibility);
 
             // Set initial values from config
             if (dataTypesConfig[col]) {
@@ -668,8 +670,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (dataTypesConfig[col].type === 'number') {
                     numberOptions.style.display = 'block';
                     formatSelect.value = dataTypesConfig[col].numberFormat || 'float';
-                    const decimalsInput = colDiv.querySelector('.decimals-input');
                     decimalsInput.value = dataTypesConfig[col].decimals || 2;
+                    updateDecimalsVisibility();
                 }
             }
         });

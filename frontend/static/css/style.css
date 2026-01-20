@@ -215,7 +215,7 @@ hr {
 /* Main Content */
 .main-content {
     flex-grow: 1;
-    padding: 2rem;
+    padding: 1rem;
     max-width: 100%;
     overflow-x: hidden;
     background-color: white;
@@ -301,17 +301,17 @@ h1 {
     color: #1a535c;
     padding: 1rem;
     border-radius: 8px;
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
 }
 
 /* Cards & Details */
 .card,
 .card-details {
     background: white;
-    padding: 1.5rem;
-    border-radius: 12px;
+    padding: 1rem;
+    border-radius: 8px;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
     transition: transform 0.2s, box-shadow 0.2s;
     border: 1px solid var(--border-color);
 }
@@ -323,9 +323,9 @@ details.card-details>summary {
     cursor: pointer;
     font-size: 1.2rem;
     font-weight: 600;
-    margin: -1.5rem;
+    margin: -1rem;
     /* Negate padding */
-    padding: 1.5rem;
+    padding: 1rem;
     display: flex;
     align-items: center;
     position: relative;
@@ -355,10 +355,10 @@ details.card-details>summary h3 {
 }
 
 .card-content {
-    margin-top: 1.5rem;
+    margin-top: 1rem;
     border-top: 1px solid #eee;
     /* Divider */
-    padding-top: 1.5rem;
+    padding-top: 1rem;
 }
 
 .card:hover,
@@ -385,8 +385,8 @@ h3 {
 .metrics-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1rem;
+    gap: 1rem;
+    margin-top: 0.5rem;
 }
 
 .metrics-horizontal {
@@ -400,8 +400,8 @@ h3 {
 
 .metric-card {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    padding: 1.5rem;
-    border-radius: 16px;
+    padding: 1rem;
+    border-radius: 12px;
     text-align: center;
     border: 1px solid rgba(224, 224, 224, 0.5);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -411,7 +411,7 @@ h3 {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    min-height: 120px;
+    min-height: 100px;
 }
 
 .metric-card::before {
@@ -478,8 +478,8 @@ h3 {
 
 .metric-card-horizontal {
     background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
-    padding: 1rem;
-    border-radius: 12px;
+    padding: 0.75rem;
+    border-radius: 8px;
     text-align: center;
     border: 1px solid rgba(224, 224, 224, 0.5);
     flex: 1 0 0%;
@@ -529,9 +529,9 @@ th {
 
 .viz-controls {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     flex-wrap: wrap;
-    margin-bottom: 1rem;
+    margin-bottom: 0.75rem;
 }
 
 .control-group {
@@ -586,7 +586,7 @@ th {
 .grid-3 {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .control-row {
