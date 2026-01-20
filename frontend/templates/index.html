@@ -1,22 +1,19 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="content-header" style="margin-bottom: 1rem;">
-    <h1 style="margin-bottom: 0.5rem;">📈 Make Your Tables Alive</h1>
-    <p style="font-size: 1.2rem; color: #666; margin: 0.5rem 0 0 0; font-weight: 400;">
+<div class="content-header">
+    <h1>📈 Make Your Tables Alive</h1>
+    <p class="subtitle">
         Transform static spreadsheets into interactive dashboards, charts, and insights in seconds. No coding required!
     </p>
 </div>
 
 <div id="initial-state">
     <div class="info-box">
-        👈 Connect a public Google Sheet to start.
+        Connect a public Google Sheet to start.
     </div>
-    <div class="video-container">
-        <video autoplay loop muted playsinline width="100%">
-            <source src="/video.mp4" type="video/mp4">
-            Your browser does not support the video tag.
-        </video>
+    <div class="image-container">
+        <img src="/static/image-center.png" alt="Tables Alive - Transform your spreadsheets into interactive dashboards">
     </div>
 </div>
 
@@ -113,60 +110,64 @@
             </div>
 
             <!-- Axis Range Controls -->
-            <div class="viz-controls" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 15px;">
-                <div class="control-group">
-                    <label>X-Axis Range</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="number" id="x-min" class="input-text" placeholder="Min" style="margin-bottom:0">
-                        <input type="number" id="x-max" class="input-text" placeholder="Max" style="margin-bottom:0">
+            <div class="axis-range-controls" style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 15px;">
+                <div class="axis-controls-row">
+                    <div class="control-group">
+                        <label>X-Axis Range</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="number" id="x-min" class="input-text" placeholder="Min" style="margin-bottom:0">
+                            <input type="number" id="x-max" class="input-text" placeholder="Max" style="margin-bottom:0">
+                        </div>
                     </div>
-                </div>
-                <div class="control-group">
-                    <label>Y-Axis Range</label>
-                    <div style="display: flex; gap: 5px;">
-                        <input type="number" id="y-min" class="input-text" placeholder="Min" style="margin-bottom:0">
-                        <input type="number" id="y-max" class="input-text" placeholder="Max" style="margin-bottom:0">
+                    <div class="control-group">
+                        <label>Y-Axis Range</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="number" id="y-min" class="input-text" placeholder="Min" style="margin-bottom:0">
+                            <input type="number" id="y-max" class="input-text" placeholder="Max" style="margin-bottom:0">
+                        </div>
                     </div>
-                </div>
-                <div class="control-group" style="display: flex; align-items: flex-end;">
-                    <button type="button" id="apply-ranges-btn" class="btn-secondary"
-                        style="height: 38px; width: 100%;">Apply Ranges</button>
+                    <div class="control-group apply-ranges-group">
+                        <button type="button" id="apply-ranges-btn" class="btn-secondary"
+                            style="height: 38px; margin-top: 24px;">Apply Ranges</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Viz Grouping Controls -->
             <details class="viz-grouping-details" style="margin-top: 15px; border-top: 1px solid #eee; padding-top: 15px;">
                 <summary style="cursor: pointer; font-weight: 600; margin-bottom: 10px;">📊 Viz Grouping</summary>
-                <div class="viz-controls">
-                    <div class="control-group">
-                        <label>Group By Column:</label>
-                        <select id="group-by-select" class="input-select"></select>
-                    </div>
-                    <div class="control-group" id="period-row" style="display:none;">
-                        <label>Period (for dates):</label>
-                        <select id="group-period-select" class="input-select">
-                            <option value="">None</option>
-                            <option value="week">Week</option>
-                            <option value="month">Month</option>
-                            <option value="year">Year</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label>Metric Columns:</label>
-                        <select id="group-metric-select" class="input-select" multiple style="height:100px;"></select>
-                    </div>
-                    <div class="control-group">
-                        <label>Function:</label>
-                        <select id="group-func-select" class="input-select">
-                            <option value="sum">Sum</option>
-                            <option value="mean">Mean</option>
-                            <option value="count">Count</option>
-                            <option value="min">Min</option>
-                            <option value="max">Max</option>
-                        </select>
-                    </div>
-                    <div class="control-group" style="display: flex; align-items: flex-end;">
-                        <button id="apply-group-btn" class="btn-primary" style="height: 38px;">Apply Grouping</button>
+                <div class="viz-controls viz-grouping-controls">
+                    <div class="grouping-controls-row">
+                        <div class="control-group">
+                            <label>Group By Column:</label>
+                            <select id="group-by-select" class="input-select"></select>
+                        </div>
+                        <div class="control-group" id="period-row" style="display:none;">
+                            <label>Period (for dates):</label>
+                            <select id="group-period-select" class="input-select">
+                                <option value="">None</option>
+                                <option value="week">Week</option>
+                                <option value="month">Month</option>
+                                <option value="year">Year</option>
+                            </select>
+                        </div>
+                        <div class="control-group">
+                            <label>Metric Columns:</label>
+                            <select id="group-metric-select" class="input-select" multiple style="height:100px;"></select>
+                        </div>
+                        <div class="control-group">
+                            <label>Function:</label>
+                            <select id="group-func-select" class="input-select">
+                                <option value="sum">Sum</option>
+                                <option value="mean">Mean</option>
+                                <option value="count">Count</option>
+                                <option value="min">Min</option>
+                                <option value="max">Max</option>
+                            </select>
+                        </div>
+                        <div class="control-group apply-grouping-group">
+                            <button id="apply-group-btn" class="btn-primary" style="height: 38px; margin-top: 24px;">Apply Grouping</button>
+                        </div>
                     </div>
                 </div>
             </details>

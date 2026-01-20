@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   backend:
-    image: ${DOCKER_REGISTRY_USER}/sheets-backend:20260120v2
+    image: ${DOCKER_REGISTRY_USER}/sheets-backend:20260120v3
     restart: always
     expose:
       - "5000"
@@ -10,7 +10,7 @@ services:
       - .env
 
   frontend:
-    image: ${DOCKER_REGISTRY_USER}/sheets-frontend:20260120v2
+    image: ${DOCKER_REGISTRY_USER}/sheets-frontend:20260120v3
     restart: always
     expose:  # Add this to expose 8501 internally
       - "8501"
