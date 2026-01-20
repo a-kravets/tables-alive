@@ -26,8 +26,23 @@ services:
       - "80:80"
       - "443:443"  # For HTTPS; configure certs below
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro  # Mount your config file
-      - ./certs:/etc/nginx/certs:ro  # Optional: For SSL certs
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
     depends_on:
       - frontend
       - backend
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+
+  certbot-renew:
+    image: certbot/certbot
+    command: renew --webroot -w /var/www/certbot
+    volumes:
+      - ./certbot/conf:/etc/letsencrypt
+      - ./certbot/www:/var/www/certbot
+    restart: unless-stopped
