@@ -46,6 +46,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // DOM Elements
     const inputUrl = document.getElementById("sheet_url");
     const inputGid = document.getElementById("gid_input");
+    const checkboxHeaders = document.getElementById("has_headers");
     const btnRefresh = document.getElementById("refresh-btn");
     const divInitial = document.getElementById("initial-state");
     const divLoading = document.getElementById("loading-state");
@@ -152,6 +153,45 @@ document.addEventListener("DOMContentLoaded", () => {
     let columnOrder = [];
     let dataTypesConfig = {}; // { columnName: { type: 'string'|'number'|'date', numberFormat: 'int'|'float', decimals: 2 } }
 
+    // URL Parsing Functions
+    function extractGidFromUrl(url) {
+        if (!url) return null;
+
+        try {
+            // Check for gid in query parameters first
+            const urlObj = new URL(url);
+            const gidParam = urlObj.searchParams.get('gid');
+            if (gidParam) return gidParam;
+
+            // Check for gid in hash fragment
+            if (urlObj.hash && urlObj.hash.includes('gid=')) {
+                const hashParams = new URLSearchParams(urlObj.hash.substring(1));
+                return hashParams.get('gid');
+            }
+
+            // Check for gid in the URL string directly (fallback for various formats)
+            const gidMatch = url.match(/[?&]gid=([^&#]+)/);
+            if (gidMatch) return gidMatch[1];
+
+            return null;
+        } catch (e) {
+            // Fallback: try regex on the raw URL string
+            const gidMatch = url.match(/[?&]gid=([^&#]+)/);
+            if (gidMatch) return gidMatch[1];
+
+            console.warn('Error parsing URL:', e);
+            return null;
+        }
+    }
+
+    function updateGidFromUrl() {
+        const url = inputUrl.value;
+        const extractedGid = extractGidFromUrl(url);
+        if (extractedGid && (!inputGid.value || inputGid.value !== extractedGid)) {
+            inputGid.value = extractedGid;
+        }
+    }
+
     // State Persistence Functions
     function saveDataToolsState() {
         sessionStorage.setItem('renameMap', JSON.stringify(renameMap));
@@ -160,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
         sessionStorage.setItem('tableGroupConfig', JSON.stringify(tableGroupConfig));
         sessionStorage.setItem('columnOrder', JSON.stringify(columnOrder));
         sessionStorage.setItem('dataTypesConfig', JSON.stringify(dataTypesConfig));
+        sessionStorage.setItem('hasHeaders', checkboxHeaders.checked);
     }
 
     function restoreDataToolsState() {
@@ -170,6 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const savedTableGroupConfig = sessionStorage.getItem('tableGroupConfig');
             const savedColumnOrder = sessionStorage.getItem('columnOrder');
             const savedDataTypesConfig = sessionStorage.getItem('dataTypesConfig');
+            const savedHasHeaders = sessionStorage.getItem('hasHeaders');
 
             if (savedRenameMap) renameMap = JSON.parse(savedRenameMap);
             if (savedFilters) activeFilters = JSON.parse(savedFilters);
@@ -180,6 +222,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
             if (savedColumnOrder) columnOrder = JSON.parse(savedColumnOrder);
             if (savedDataTypesConfig) dataTypesConfig = JSON.parse(savedDataTypesConfig);
+            if (savedHasHeaders !== null) checkboxHeaders.checked = savedHasHeaders === 'true';
         } catch (e) {
             console.error('Error restoring state:', e);
         }
@@ -209,6 +252,11 @@ document.addEventListener("DOMContentLoaded", () => {
         if (inputUrl) inputUrl.value = targetUrl;
         if (inputGid) inputGid.value = targetGid || "";
 
+        // Auto-extract GID from URL if not already set
+        if (inputUrl && inputUrl.value && (!inputGid || !inputGid.value)) {
+            updateGidFromUrl();
+        }
+
         if (!urlParams.has("sheet_url")) {
             const newUrl = new URL(window.location);
             newUrl.searchParams.set("sheet_url", targetUrl);
@@ -227,6 +275,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (btnLoadData) {
         btnLoadData.addEventListener("click", triggerFetch);
+    }
+
+    // Auto-extract GID from URL when URL changes
+    if (inputUrl) {
+        inputUrl.addEventListener("input", updateGidFromUrl);
+        inputUrl.addEventListener("paste", () => {
+            // Delay to allow paste to complete
+            setTimeout(updateGidFromUrl, 10);
+        });
     }
 
     // Enter key support
@@ -333,17 +390,94 @@ document.addEventListener("DOMContentLoaded", () => {
             alert("Please enter a Google Sheet URL");
             return;
         }
+
+        // Auto-extract GID from URL before fetching
+        updateGidFromUrl();
+
+        // Debug logging
+        console.log("Loading new data from URL:", inputUrl.value, "GID:", inputGid.value);
+
         sessionStorage.setItem("sheet_url", inputUrl.value);
         if (inputGid.value) sessionStorage.setItem("gid", inputGid.value);
         else sessionStorage.removeItem("gid");
 
-        const newUrl = new URL(window.location);
-        newUrl.searchParams.set("sheet_url", inputUrl.value);
-        if (inputGid.value) newUrl.searchParams.set("gid", inputGid.value);
-        else newUrl.searchParams.delete("gid");
-        window.history.pushState({}, "", newUrl);
+        const urlObj = new URL(window.location);
+        urlObj.searchParams.set("sheet_url", inputUrl.value);
+        if (inputGid.value) urlObj.searchParams.set("gid", inputGid.value);
+        else urlObj.searchParams.delete("gid");
+        window.history.pushState({}, "", urlObj);
 
+        // Clear old data and state when loading new data
+        clearOldDataState();
         fetchData();
+    }
+
+    function clearOldDataState() {
+        // Clear processed data
+        rawData = [];
+        currentData = [];
+        vizData = [];
+        tableData = [];
+
+        // Clear data tools state
+        renameMap = {};
+        activeFilters = [];
+        groupConfig = { enabled: false, col: '', metrics: [], func: 'sum', period: '' };
+        tableGroupConfig = { enabled: false, cols: [], metrics: [], func: 'sum', period: '' };
+        columnOrder = [];
+        dataTypesConfig = {};
+
+        // Clear visualization state
+        sessionStorage.removeItem('chart_type');
+        sessionStorage.removeItem('x_axis');
+        sessionStorage.removeItem('y_axis');
+        sessionStorage.removeItem('color_axis');
+        sessionStorage.removeItem('x_min');
+        sessionStorage.removeItem('x_max');
+        sessionStorage.removeItem('y_min');
+        sessionStorage.removeItem('y_max');
+
+        // Clear session storage for data tools
+        sessionStorage.removeItem('renameMap');
+        sessionStorage.removeItem('activeFilters');
+        sessionStorage.removeItem('groupConfig');
+        sessionStorage.removeItem('tableGroupConfig');
+        sessionStorage.removeItem('columnOrder');
+        sessionStorage.removeItem('dataTypesConfig');
+        // Don't clear hasHeaders as it should persist for the new sheet
+    }
+
+    function clearDashboardContent() {
+        // Clear chart - use Plotly.purge if available to properly clear
+        if (divChart) {
+            try {
+                Plotly.purge(divChart);
+            } catch (e) {
+                // Fallback to clearing innerHTML
+                divChart.innerHTML = "";
+            }
+        }
+
+        // Clear table
+        if (divTable) divTable.innerHTML = "";
+
+        // Clear metrics
+        if (divMetrics) divMetrics.innerHTML = "";
+
+        // Clear data-dependent selects (but keep chart type which has static options)
+        const dataSelects = [selX, selY, selColor, selMetric];
+        dataSelects.forEach(sel => {
+            if (sel) {
+                sel.innerHTML = "";
+                sel.value = "";
+            }
+        });
+
+        // Clear range inputs
+        if (inputXMin) inputXMin.value = "";
+        if (inputXMax) inputXMax.value = "";
+        if (inputYMin) inputYMin.value = "";
+        if (inputYMax) inputYMax.value = "";
     }
 
     // Viz Event Listeners
@@ -371,13 +505,19 @@ document.addEventListener("DOMContentLoaded", () => {
         divLoading.style.display = "block";
         divDashboard.style.display = "none";
 
+        // Clear existing dashboard content to prevent old data from showing
+        clearDashboardContent();
+
         try {
-            const resp = await fetch("/api/proxy/data", {
+            // Add timestamp to prevent caching
+            const cacheBust = Date.now();
+            const resp = await fetch(`/api/proxy/data?t=${cacheBust}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     sheet_url: inputUrl.value,
-                    gid: inputGid.value
+                    gid: inputGid.value,
+                    has_headers: checkboxHeaders.checked
                 })
             });
 
@@ -387,12 +527,35 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             rawData = await resp.json();
+            console.log("Received raw data:", rawData.length, "rows");
 
             if (rawData.length === 0) {
                 alert("No data found.");
                 divLoading.style.display = "none";
                 divInitial.style.display = "block";
                 return;
+            }
+
+            // If no headers, use first row values as column names
+            if (!checkboxHeaders.checked && rawData.length > 0) {
+                const firstRow = rawData[0];
+                const columnKeys = Object.keys(firstRow);
+                const columnMapping = {};
+
+                columnKeys.forEach((key, index) => {
+                    // Use the actual value from the first row as the column name
+                    const columnName = String(firstRow[key] || `Column ${index + 1}`);
+                    columnMapping[key] = columnName;
+                });
+
+                // Rename all rows (including the first row) with the new column names
+                rawData = rawData.map(row => {
+                    const newRow = {};
+                    Object.keys(row).forEach(oldKey => {
+                        newRow[columnMapping[oldKey]] = row[oldKey];
+                    });
+                    return newRow;
+                });
             }
 
             // Restore saved state

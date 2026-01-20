@@ -29,6 +29,7 @@ SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE', 'service_account
 class SheetRequest(BaseModel):
     sheet_url: str
     gid: Optional[str] = None
+    has_headers: Optional[bool] = True
 
 # --- Helpers ---
 def csv_hash(df):
@@ -36,7 +37,7 @@ def csv_hash(df):
         pd.util.hash_pandas_object(df, index=True).values
     ).hexdigest()
 
-def get_gsheet_df(sheet_url: str, gid: str = None) -> pd.DataFrame:
+def get_gsheet_df(sheet_url: str, gid: str = None, has_headers: bool = True) -> pd.DataFrame:
     if os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE') and os.path.exists(SERVICE_ACCOUNT_FILE):
         creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
         gc = gspread.authorize(creds)
@@ -57,8 +58,13 @@ def get_gsheet_df(sheet_url: str, gid: str = None) -> pd.DataFrame:
         else:
             worksheet = sh.sheet1
             
-        data = worksheet.get_all_records()
-        return pd.DataFrame(data)
+        if has_headers:
+            data = worksheet.get_all_records()
+            return pd.DataFrame(data)
+        else:
+            # Get all values including the first row
+            data = worksheet.get_all_values()
+            return pd.DataFrame(data)
     else:
         # Public sheet logic
         base_url = sheet_url.split('/edit')[0]
@@ -74,7 +80,7 @@ def get_gsheet_df(sheet_url: str, gid: str = None) -> pd.DataFrame:
             last_hash = None
             
             while True:
-                df = pd.read_csv(csv_url, on_bad_lines='skip')
+                df = pd.read_csv(csv_url, on_bad_lines='skip', header=0 if has_headers else None)
                 current_hash = csv_hash(df)
                 
                 if current_hash == last_hash and not df.empty:
@@ -102,10 +108,14 @@ def health_check():
 @app.post("/data")
 def get_data(req: SheetRequest):
     try:
-        df = get_gsheet_df(req.sheet_url, req.gid)
+        df = get_gsheet_df(req.sheet_url, req.gid, req.has_headers)
         # Convert NaN to None for valid JSON
         records = df.where(pd.notnull(df), None).to_dict(orient='records')
-        return JSONResponse(content=records)
+        response = JSONResponse(content=records)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
     except Exception as e:
         print(f"Error: {e}")
         return JSONResponse(content={"error": str(e)}, status_code=400)
@@ -113,27 +123,42 @@ def get_data(req: SheetRequest):
 @app.post("/analyze")
 def analyze(req: SheetRequest):
     try:
-        df = get_gsheet_df(req.sheet_url, req.gid)
-        return {
+        df = get_gsheet_df(req.sheet_url, req.gid, req.has_headers)
+        response = JSONResponse(content={
             'columns': list(df.columns),
             'preview': df.head(10).where(pd.notnull(df), None).to_dict(orient='records'),
             'total_rows': len(df),
             'numeric_columns': list(df.select_dtypes(include=['number']).columns)
-        }
+        })
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
     except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=400)
+        response = JSONResponse(content={"error": str(e)}, status_code=400)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
 @app.post("/download")
 def download(req: SheetRequest):
     try:
-        df = get_gsheet_df(req.sheet_url, req.gid)
+        df = get_gsheet_df(req.sheet_url, req.gid, req.has_headers)
         stream = io.StringIO()
         df.to_csv(stream, index=False)
         response = Response(content=stream.getvalue(), media_type="text/csv")
         response.headers["Content-Disposition"] = "attachment; filename=data.csv"
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
         return response
     except Exception as e:
-         return JSONResponse(content={"error": str(e)}, status_code=400)
+        response = JSONResponse(content={"error": str(e)}, status_code=400)
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+        return response
 
 if __name__ == "__main__":
     import uvicorn
