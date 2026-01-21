@@ -27,6 +27,7 @@ BACKEND_URL = os.getenv("BACKEND_URL", "http://backend:5000")
 class ProxyRequest(BaseModel):
     sheet_url: str
     gid: Optional[str] = None
+    has_headers: Optional[bool] = True
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root(request: Request):

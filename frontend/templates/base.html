@@ -15,76 +15,93 @@
 </head>
 
 <body>
-    <div class="app-container">
-        <!-- Sidebar Toggle Button -->
-        <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle Sidebar">
-            <span class="toggle-icon">☰</span>
-        </button>
-
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <h2>📍 Navigation</h2>
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <button class="menu-toggle" id="menu-toggle" title="Toggle menu">☰</button>
+                <a href="/" class="logo-link">
+                    <span class="logo-icon">📈</span>
+                    <span class="logo-text">TablesAlive</span>
+                </a>
             </div>
-            <nav>
-                <a href="/" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Home</a>
-                <a href="/usecases" class="nav-link {% if request.url.path == '/usecases' %}active{% endif %}">Use Cases</a>
-                <a href="/pricing" class="nav-link {% if request.url.path == '/pricing' %}active{% endif %}">Pricing</a>
-                <a href="/faq" class="nav-link {% if request.url.path == '/faq' %}active{% endif %}">FAQ</a>
-            </nav>
-
-            <hr>
-
-            <div class="connection-section">
-                <h2>🔌 Connection</h2>
-                <!-- Input for URL -->
-                <label for="sheet_url">
-                    Google Sheet URL
-                    <span class="info-icon" title="Paste the full URL.">ℹ️</span>
-                </label>
-                <input type="text" id="sheet_url" placeholder="https://docs.google.com/..." class="input-text">
-                <br>
-                <label for="gid_input">
-                    Sheet GID (Numeric ID)
-                    <span class="info-icon" title="Numeric ID after 'gid='. Use '0' for default.">ℹ️</span>
-                </label>
-                <input type="text" id="gid_input" placeholder="0" class="input-text">
-
-                <hr>
-
-                <!-- Header Checkbox -->
-                <label for="has_headers" style="display: flex; align-items: center; gap: 8px; font-weight: normal;">
-                    <input type="checkbox" id="has_headers" checked style="margin: 0;">
-                    <span>First row contains headers</span>
-                    <span class="info-icon" title="Uncheck if your data starts with values, not column names">ℹ️</span>
-                </label>
-
-                <hr>
-
-                <button id="load-data-btn" class="btn-primary" style="margin-bottom: 10px;">Load Data 🚀</button>
-                <br><br>
-                <button id="refresh-btn" class="btn-secondary">Refresh Now ⚡</button>
-                <small>May reset filters</small>
+            <div class="nav-menu">
+                <a href="/usecases" class="nav-link">Use Cases</a>
+                <a href="/pricing" class="nav-link">Pricing</a>
+                <a href="/faq" class="nav-link">FAQ</a>
+                <a href="/data-sources" class="nav-link nav-link-gated">Data Sources</a>
+                <a href="/dashboards" class="nav-link nav-link-gated active">Dashboards</a>
+                <a href="/reports" class="nav-link nav-link-gated">Reports</a>
             </div>
-
-            <hr>
-            <div class="sidebar-footer">
-                <a href="https://www.tablesalive.com/" target="_blank">☕ Buy me a coffee</a>
+            <div class="nav-user">
+                <button class="theme-toggle" id="theme-toggle" title="Toggle theme" style="display: none;">🌓</button>
+                <div class="user-menu">
+                    <button class="user-btn" id="user-btn">
+                        <span class="user-avatar">👤</span>
+                        <span class="user-name">Guest</span>
+                    </button>
+                    <div class="user-dropdown" id="user-dropdown">
+                        <a href="/profile">Profile</a>
+                        <a href="/settings">Settings</a>
+                        <hr>
+                        <a href="/logout">Logout</a>
+                    </div>
+                </div>
             </div>
-        </aside>
+        </div>
+    </nav>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            {% block content %}{% endblock %}
-
-            <footer class="footer">
-                <p>📊 Make Your Tables Alive | © 2026</p>
-                <p><a href="https://www.tablesalive.com/">www.tablesalive.com</a> | <a href="https://www.linkedin.com/in/andriykravets/" target="_blank">LinkedIn</a></p>
-            </footer>
-        </main>
+    <!-- Auth Modal Overlay -->
+    <div class="modal-overlay" id="auth-modal-overlay">
+        <div class="auth-modal">
+            <button class="close-modal-btn">✕</button>
+            <h2>Welcome</h2>
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-mode="login">Login</button>
+                <button class="auth-tab" data-mode="register">Register</button>
+            </div>
+            <form class="auth-form" id="auth-form">
+                <div class="form-group">
+                    <input type="email" class="input-text" placeholder="Email Address" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" class="input-text" placeholder="Password" required>
+                </div>
+                <button type="submit" class="btn-primary auth-submit-btn" disabled>Login (Coming soon)</button>
+            </form>
+        </div>
     </div>
 
+    <div class="app-container">
+        {% block content %}{% endblock %}
+    </div>
+
+    <footer class="main-footer">
+        <div class="footer-container">
+            <div class="footer-info">
+                <span>📊 Make Your Tables Alive | © 2026</span>
+                <div class="footer-links">
+                    <a href="https://www.tablesalive.com/">www.tablesalive.com</a>
+                    <span class="divider">|</span>
+                    <a href="https://www.linkedin.com/in/andriykravets/" target="_blank">LinkedIn</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
     <script src="/static/js/main.js"></script>
+    <script>
+        console.log("📋 Page initialized");
+
+        // Add global error handler
+        window.addEventListener('error', function (e) {
+            console.error('Global error caught:', e.error);
+        });
+
+        window.addEventListener('unhandledrejection', function (e) {
+            console.error('Unhandled promise rejection:', e.reason);
+        });
+    </script>
 </body>
 
 </html>

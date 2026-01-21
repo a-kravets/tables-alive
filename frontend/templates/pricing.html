@@ -1,236 +1,76 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="faq-container">
-    <h1>💰 Pricing</h1>
-    <p class="intro-text">Choose the perfect plan for your data visualization needs.</p>
+<div class="marketing-page-container">
+    <div class="marketing-content">
+        <h1>💰 Pricing</h1>
+        <p class="lead-text">Choose the perfect plan for your data visualization needs.</p>
 
-    <div class="pricing-container">
-        <div class="pricing-card featured">
-            <div class="pricing-header">
-                <h2>Free</h2>
-                <div class="price">
-                    <span class="amount">$0</span>
-                    <span class="period">forever</span>
-                </div>
-            </div>
-            <div class="pricing-features">
+        <div class="pricing-grid">
+            <div class="pricing-card featured">
+                <div class="badge">Most Popular</div>
+                <h3>Free</h3>
+                <div class="price">$0<span>/mo</span></div>
                 <ul>
                     <li>✅ Connect to Google Sheets</li>
                     <li>✅ Basic visualizations (Bar, Line, Scatter)</li>
                     <li>✅ Data filtering and sorting</li>
                     <li>✅ Basic data aggregation and grouping</li>
-                    <li>✅ Export charts as images</li>
+                    <li>✅ Export tables as CSV</li>
                     <li>✅ Community support</li>
                 </ul>
+                <button class="btn-secondary">Current Plan</button>
             </div>
-            <div class="pricing-button">
-                <button class="btn-primary">Get Started Free</button>
-            </div>
-        </div>
 
-        <div class="pricing-card">
-            <div class="pricing-header">
-                <h2>Pro</h2>
-                <div class="price">
-                    <span class="amount">$9.99</span>
-                    <span class="period">/month</span>
-                </div>
-            </div>
-            <div class="pricing-features">
+            <div class="pricing-card">
+                <h3>Pro</h3>
+                <div class="price">$9.50<span>/mo</span></div>
                 <ul>
                     <li>✅ Everything in Free</li>
                     <li>✅ Advanced chart types (Pie, Histogram, Area)</li>
                     <li>✅ Advanced data aggregation and grouping</li>
                     <li>✅ Pivot tables: wrangle your data in whatever way you want</li>
-                    <li>✅ Custom color schemes</li>
-                    <li>✅ Priority support</li>
                     <li>✅ Connect to private Google Sheets</li>
-                    <li>✅ Ability to save your data and data sources</li>
                     <li>✅ Higher table size limits</li>
-                    <li>✅ Comment your tables</li>
+                    <li>✅ Save your data and data sources</li>
+                    <li>✅ Save comments on your tables</li>
                 </ul>
+                <button class="btn-primary">Coming soon</button>
             </div>
-            <div class="pricing-button">
+
+            <div class="pricing-card">
+                <h3>Enterprise</h3>
+                <div class="price">$24.95<span>/mo</span></div>
+                <ul>
+                    <li>✅ Everything in Pro</li>
+                    <li>✅ Multiple tabs and data sources</li>
+                    <li>✅ Join and union multiple tables</li>
+                    <li>✅ Track any changes in your tables</li>
+                    <li>✅ Save your data and data sources</li>
+                    <li>✅ Get notified of any changes</li>
+                    <li>✅ Talk to your tables via custom AI agent</li>
+                    <li>✅ Higher number of tables and table size limits</li>
+                    <li>✅ Custom integrations</li>
+                </ul>
                 <button class="btn-secondary">Coming soon</button>
             </div>
         </div>
 
-        <div class="pricing-card">
-            <div class="pricing-header">
-                <h2>Enterprise</h2>
-                <div class="price">
-                    <span class="amount">$29.99</span>
-                    <span class="period">/month</span>
-                </div>
+        <section class="pricing-faq">
+            <h2>❓ Pricing FAQ</h2>
+            <div class="faq-item">
+                <h4>Can I change my plan later?</h4>
+                <p>Yes! You can upgrade or downgrade your plan at any time.</p>
             </div>
-            <div class="pricing-features">
-                <ul>
-                    <li>✅ Everything in Pro</li>
-                    <li>✅ Multiple tabs and data sources, not limited to Google Sheets</li>
-                    <li>✅ Join and union multiple tables</li>
-                    <li>✅ Track any changes in your tables</li>
-                    <li>✅ Get notified of any changes</li>
-                    <li>✅ Talk to your tables via custom AI agent</li>
-                    <li>✅ Make changes to your Google Sheets directly from the app</li>
-                    <li>✅ Custom integrations</li>
-                    <li>✅ Dedicated support</li>
-                </ul>
+            <div class="faq-item">
+                <h4>Are there annual plans?</h4>
+                <p>No, but you can try them for one month and decide which one suits your needs best.</p>
             </div>
-            <div class="pricing-button">
-                <button class="btn-secondary">Conming soon</button>
+            <div class="faq-item">
+                <h4>What payment methods do you accept?</h4>
+                <p>We accept all major credit cards, PayPal, and bank transfers for Enterprise customers.</p>
             </div>
-        </div>
-    </div>
-
-    <div class="pricing-faq">
-        <h2>❓ Frequently Asked Questions</h2>
-        <details>
-            <summary>Can I switch plans anytime?</summary>
-            <p>Yes! You can upgrade or downgrade your plan at any time. Changes take effect from the start of your next billing month in case of downgrading or immediately in other cases.</p>
-        </details>
-        <details>
-            <summary>Is there a free trial for paid plans?</summary>
-            <p>No, but you can try them for one month and decide which one suits your needs best.</p>
-        </details>
-        <details>
-            <summary>What payment methods do you accept?</summary>
-            <p>We accept all major credit cards, PayPal, and bank transfers for Enterprise customers.</p>
-        </details>
-        <details>
-            <summary>Can I cancel my subscription?</summary>
-            <p>Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.</p>
-        </details>
+        </section>
     </div>
 </div>
-
-<style>
-.pricing-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 2rem;
-    margin: 2rem 0;
-}
-
-@media (min-width: 768px) {
-    .pricing-container {
-        grid-template-columns: repeat(3, 1fr);
-    }
-}
-
-.pricing-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border: 2px solid #e9ecef;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-@media (min-width: 768px) {
-    .pricing-card {
-        padding: 2rem;
-    }
-}
-
-.pricing-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.pricing-card.featured {
-    border-color: var(--primary-color);
-    position: relative;
-}
-
-.pricing-card.featured::before {
-    content: "Most Popular";
-    position: absolute;
-    top: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--primary-color);
-    color: white;
-    padding: 4px 12px;
-    border-radius: 12px;
-    font-size: 0.8rem;
-    font-weight: 600;
-}
-
-.pricing-header h2 {
-    margin: 0 0 1rem 0;
-    color: #333;
-}
-
-.price {
-    margin-bottom: 2rem;
-}
-
-.amount {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--primary-color);
-}
-
-@media (min-width: 768px) {
-    .amount {
-        font-size: 3rem;
-    }
-}
-
-.period {
-    color: #6c757d;
-    font-size: 1rem;
-}
-
-.pricing-features ul {
-    list-style: none;
-    padding: 0;
-    margin: 0 0 2rem 0;
-}
-
-.pricing-features li {
-    padding: 0.5rem 0;
-    border-bottom: 1px solid #f8f9fa;
-}
-
-.pricing-features li:last-child {
-    border-bottom: none;
-}
-
-.pricing-button {
-    margin-top: auto;
-}
-
-.pricing-faq {
-    margin-top: 3rem;
-    padding-top: 2rem;
-    border-top: 1px solid #e9ecef;
-}
-
-.pricing-faq h2 {
-    text-align: center;
-    margin-bottom: 2rem;
-    color: #333;
-}
-
-.pricing-faq details {
-    margin-bottom: 1rem;
-    background: #f8f9fa;
-    border-radius: 8px;
-    padding: 1rem;
-}
-
-.pricing-faq summary {
-    cursor: pointer;
-    font-weight: 600;
-    color: #333;
-}
-
-.pricing-faq p {
-    margin-top: 0.5rem;
-    color: #666;
-}
-</style>
 {% endblock %}

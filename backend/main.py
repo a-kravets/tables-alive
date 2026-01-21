@@ -38,10 +38,12 @@ def csv_hash(df):
     ).hexdigest()
 
 def get_gsheet_df(sheet_url: str, gid: str = None, has_headers: bool = True) -> pd.DataFrame:
+    raw_values = []
+    
+    # 1. Fetch Raw Data (List of Lists)
     if os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE') and os.path.exists(SERVICE_ACCOUNT_FILE):
         creds = Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
         gc = gspread.authorize(creds)
-        
         try:
             sh = gc.open_by_url(sheet_url)
         except Exception as e:
@@ -57,47 +59,47 @@ def get_gsheet_df(sheet_url: str, gid: str = None, has_headers: bool = True) -> 
                 raise Exception(f"Worksheet with gid {gid} not found")
         else:
             worksheet = sh.sheet1
-            
-        if has_headers:
-            data = worksheet.get_all_records()
-            return pd.DataFrame(data)
-        else:
-            # Get all values including the first row
-            data = worksheet.get_all_values()
-            return pd.DataFrame(data)
+        
+        raw_values = worksheet.get_all_values()
     else:
         # Public sheet logic
         base_url = sheet_url.split('/edit')[0]
         csv_url = f"{base_url}/export?format=csv"
+        if gid:
+            csv_url += f"&gid={gid}"
         
-        if gid is not None:
-            gid_str = str(gid).strip()
-            if gid_str:
-                csv_url += f"&gid={gid_str}"
+        start = time.time()
+        last_hash = None
         
-        try:
-            start = time.time()
-            last_hash = None
+        while True:
+            # header=None ensures we read the file exactly as it is (no rows skipped)
+            df_temp = pd.read_csv(csv_url, header=None, on_bad_lines='skip')
+            current_hash = hashlib.md5(pd.util.hash_pandas_object(df_temp).values).hexdigest()
             
-            while True:
-                df = pd.read_csv(csv_url, on_bad_lines='skip', header=0 if has_headers else None)
-                current_hash = csv_hash(df)
+            if last_hash is not None and current_hash == last_hash:
+                raw_values = df_temp.values.tolist()
+                break
                 
-                if current_hash == last_hash and not df.empty:
-                    return df
-                
-                last_hash = current_hash
-                
-                if time.time() - start > 60:
-                    raise TimeoutError("Sheet did not stabilize in time")
-                
-                time.sleep(1)
-                
-        except Exception as e:
-            msg = str(e)
-            if "Error tokenizing data" in msg or "ParserError" in msg:
-                 raise Exception("Could not parse CSV. The sheet might not be public, or URL/GID is invalid.")
-            raise Exception(f"Failed to load data: {msg}")
+            last_hash = current_hash
+            if time.time() - start > 30: # 30s is more than enough for small CSVs
+                if not df_temp.empty:
+                    raw_values = df_temp.values.tolist()
+                    break
+                raise TimeoutError("Sheet data did not stabilize")
+            time.sleep(1)
+
+    # 2. Process Header Logic (Lossless)
+    if not raw_values:
+        return pd.DataFrame()
+
+    if has_headers:
+        # First row is headers
+        columns = [str(x) for x in raw_values[0]]
+        data_rows = raw_values[1:]
+        return pd.DataFrame(data_rows, columns=columns)
+    else:
+        # No headers: keep all rows (including row 0), use numeric columns
+        return pd.DataFrame(raw_values)
 
 # --- Routes ---
 
