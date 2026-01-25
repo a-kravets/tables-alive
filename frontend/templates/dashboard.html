@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container" style="padding: 20px;">
+    <h1>Welcome to your Dashboard</h1>
+    <div id="user-info">
+        <p>Loading user data...</p>
+    </div>
+
+    <div class="dashboard-links" style="margin-top: 20px;">
+        <a href="/" class="btn-secondary">Go to Home</a>
+        <button id="logoutBtn" class="btn-secondary" style="background-color: #ffcccc;">Logout</button>
+    </div>
+</div>
+
+<script>
+    async function fetchUser() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/me', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.ok) {
+                const user = await response.json();
+                document.getElementById('user-info').innerHTML = `
+                    <p><strong>Email:</strong> ${user.email}</p>
+                    <p><strong>User ID:</strong> ${user.id}</p>
+                    <p><strong>Plan:</strong> Free (Default)</p>
+                `;
+            } else {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    }
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    });
+
+    fetchUser();
+</script>
+{% endblock %}

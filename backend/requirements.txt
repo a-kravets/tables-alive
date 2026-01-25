@@ -5,3 +5,13 @@ google-auth
 gspread
 plotly
 requests
+sqlalchemy
+asyncpg
+sqlalchemy
+asyncpg
+passlib
+bcrypt==3.2.2
+python-jose[cryptography]
+python-jose[cryptography]
+python-multipart
+email-validator

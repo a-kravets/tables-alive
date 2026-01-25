@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container"
+    style="max-width: 400px; margin: 50px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+    <h2>Login</h2>
+    <form id="loginForm">
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="username" required style="width: 100%; margin-bottom: 10px; padding: 8px;">
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required
+            style="width: 100%; margin-bottom: 20px; padding: 8px;">
+
+        <button type="submit" class="btn-primary" style="width: 100%;">Login</button>
+    </form>
+    <p style="margin-top: 10px;">Don't have an account? <a href="/register">Register here</a></p>
+    <div id="error-message" style="color: red; margin-top: 10px;"></div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch('/api/login', {
+                method: 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // Store token in localStorage or cookie (for this demo, we might just rely on the backend proxy setting a cookie if possible, but simpler is localStorage)
+                // However, since we are using FastAPI Templates, we might need to handle the token.
+                // For better security, the frontend proxy should handle the session or we store it here.
+                // Let's store in localStorage and redirect.
+                localStorage.setItem('token', data.access_token);
+                window.location.href = '/dashboard';
+            } else {
+                const error = await response.json();
+                document.getElementById('error-message').innerText = error.detail || 'Login failed';
+            }
+        } catch (err) {
+            document.getElementById('error-message').innerText = 'An error occurred';
+        }
+    });
+</script>
+{% endblock %}

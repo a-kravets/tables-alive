@@ -1,0 +1,221 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container" style="padding: 20px; max-width: 1200px; margin: 0 auto;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1>📈 My Dashboards</h1>
+        <a href="/" class="btn-primary">+ New Dashboard</a>
+    </div>
+
+    <div id="dashboards-list" class="items-grid">
+        <div class="loading-message">Loading dashboards...</div>
+    </div>
+
+    <div id="empty-state" class="empty-state" style="display: none; text-align: center; padding: 60px 20px;">
+        <h3>📊 No Dashboards Yet</h3>
+        <p>Create your first dashboard by building widgets and filters on the dashboard page.</p>
+        <a href="/" class="btn-primary" style="margin-top: 20px;">Go to Dashboard</a>
+    </div>
+</div>
+
+<script>
+    async function loadDashboards() {
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login';
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/dashboards', {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (response.status === 401) {
+                localStorage.removeItem('token');
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to load dashboards');
+            }
+
+            const dashboards = await response.json();
+            const container = document.getElementById('dashboards-list');
+            const emptyState = document.getElementById('empty-state');
+
+            if (dashboards.length === 0) {
+                container.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            container.style.display = 'grid';
+            emptyState.style.display = 'none';
+            container.innerHTML = dashboards.map(dash => `
+                <div class="item-card">
+                    <div class="item-card-header">
+                        <h3>${escapeHtml(dash.name)}</h3>
+                        <button class="btn-icon btn-danger delete-btn" data-id="${dash.id}" title="Delete">🗑️</button>
+                    </div>
+                    <div class="item-card-body">
+                        <p class="item-meta">Widgets: ${dash.widgets ? dash.widgets.length : 0}</p>
+                        <p class="item-meta">Filters: ${dash.filters ? dash.filters.length : 0}</p>
+                        <p class="item-meta">Updated: ${new Date(dash.updated_at).toLocaleDateString()}</p>
+                    </div>
+                    <div class="item-card-actions">
+                        <button class="btn-primary load-btn" data-id="${dash.id}">Load</button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Attach event listeners
+            document.querySelectorAll('.load-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    loadDashboard(id);
+                });
+            });
+
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const id = e.target.dataset.id;
+                    deleteDashboard(id);
+                });
+            });
+
+        } catch (error) {
+            console.error('Error loading dashboards:', error);
+            document.getElementById('dashboards-list').innerHTML = 
+                '<div class="error-message">Failed to load dashboards. Please try again.</div>';
+        }
+    }
+
+    async function loadDashboard(id) {
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`/api/dashboards/${id}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (!response.ok) throw new Error('Failed to load dashboard');
+
+            const dashboard = await response.json();
+            
+            // Store dashboard info in sessionStorage for the dashboard to pick up
+            sessionStorage.setItem('loadDashboard', JSON.stringify(dashboard));
+
+            // Redirect to dashboard
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Error loading dashboard:', error);
+            alert('Failed to load dashboard');
+        }
+    }
+
+    async function deleteDashboard(id) {
+        const warning = '⚠️ WARNING: Deleting this dashboard will permanently remove it. Any reports you created from widgets in this dashboard are independent and will NOT be affected. This action cannot be undone.\n\nAre you sure you want to proceed?';
+        if (!confirm(warning)) {
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`/api/dashboards/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+                throw new Error(errorData.detail || 'Failed to delete dashboard');
+            }
+
+            // Reload the list
+            loadDashboards();
+        } catch (error) {
+            console.error('Error deleting dashboard:', error);
+            alert(`Failed to delete dashboard: ${error.message}`);
+        }
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Load on page load
+    loadDashboards();
+</script>
+
+<style>
+    .items-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+
+    .item-card {
+        background: var(--card-bg, #fff);
+        border: 1px solid var(--border-color, #e0e0e0);
+        border-radius: 8px;
+        padding: 20px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .item-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+
+    .item-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+    }
+
+    .item-card-header h3 {
+        margin: 0;
+        font-size: 1.2em;
+        color: var(--text-primary, #333);
+    }
+
+    .item-card-body {
+        margin-bottom: 15px;
+    }
+
+    .item-meta {
+        font-size: 0.85em;
+        color: var(--text-secondary, #999);
+        margin: 5px 0;
+    }
+
+    .item-card-actions {
+        display: flex;
+        gap: 10px;
+    }
+
+    .loading-message {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary, #666);
+    }
+
+    .error-message {
+        text-align: center;
+        padding: 40px;
+        color: var(--error-color, #d32f2f);
+    }
+</style>
+{% endblock %}

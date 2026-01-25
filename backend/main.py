@@ -25,6 +25,79 @@ app.add_middleware(
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets.readonly']
 SERVICE_ACCOUNT_FILE = os.getenv('GOOGLE_SERVICE_ACCOUNT_FILE', 'service_account.json')
 
+# --- Database & Routers ---
+from database import engine, Base, AsyncSessionLocal
+from models import Plan
+from routers.auth import router as auth_router
+from routers.datasources import router as datasources_router
+from routers.dashboards import router as dashboards_router
+from routers.reports import router as reports_router
+from sqlalchemy.future import select
+
+app.include_router(auth_router)
+app.include_router(datasources_router)
+app.include_router(dashboards_router)
+app.include_router(reports_router)
+
+@app.on_event("startup")
+async def startup():
+    # create db tables
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    
+    # Migration: Add grid_columns and grid_rows to dashboards table if they don't exist
+    from sqlalchemy import text
+    async with engine.begin() as conn:
+        try:
+            # Check and add grid_columns
+            result = await conn.execute(text("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'dashboards' AND column_name = 'grid_columns'
+            """))
+            if not result.fetchone():
+                await conn.execute(text("ALTER TABLE dashboards ADD COLUMN grid_columns INTEGER DEFAULT 12"))
+                print("✓ Added grid_columns column to dashboards table")
+            
+            # Check and add grid_rows
+            result = await conn.execute(text("""
+                SELECT column_name 
+                FROM information_schema.columns 
+                WHERE table_name = 'dashboards' AND column_name = 'grid_rows'
+            """))
+            if not result.fetchone():
+                await conn.execute(text("ALTER TABLE dashboards ADD COLUMN grid_rows INTEGER DEFAULT 10"))
+                print("✓ Added grid_rows column to dashboards table")
+        except Exception as e:
+            print(f"⚠️  Migration check failed (may already be migrated): {e}")
+    
+    # Seed Plans
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(Plan).where(Plan.name == "Free"))
+        if not result.scalars().first():
+            plans = [
+                Plan(name="Free", price="$0", limits={"max_rows": 1000}),
+                Plan(name="Pro", price="$9.50", limits={"max_rows": 10000}),
+                Plan(name="Enterprise", price="$24.95", limits={"max_rows": 100000})
+            ]
+            session.add_all(plans)
+            await session.commit()
+            
+    # Seed Admin User
+    import auth_utils
+    from models import User
+    async with AsyncSessionLocal() as session:
+        result = await session.execute(select(User).where(User.email == "admin@tablesalive.com"))
+        if not result.scalars().first():
+            hashed_password = auth_utils.get_password_hash("admin1324")
+            admin_user = User(
+                email="admin@tablesalive.com", 
+                hashed_password=hashed_password,
+                is_active=True
+            )
+            session.add(admin_user)
+            await session.commit()
+
 # --- Models ---
 class SheetRequest(BaseModel):
     sheet_url: str

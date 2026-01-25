@@ -11,6 +11,14 @@
         <!-- Data Source Section -->
         <div class="sidebar-section">
             <h4>Data Source</h4>
+            <!-- Datasource Selector Dropdown (shown when logged in with saved datasources) -->
+            <div id="datasource-selector-container" style="display: none; margin-bottom: 15px;">
+                <label for="datasource-selector">Select Data Source:</label>
+                <select id="datasource-selector" class="input-select" style="width: 100%;">
+                    <option value="">+ New Data Source</option>
+                    <!-- Saved datasources will be populated here -->
+                </select>
+            </div>
             <div class="data-source-form">
                 <label for="sheet_url">Google Sheet URL</label>
                 <input type="text" id="sheet_url" placeholder="https://docs.google.com/..." class="input-text">
@@ -21,10 +29,22 @@
                     <span class="checkbox-label">1st row is headers</span>
                 </label>
                 <div class="data-source-actions">
-                    <button id="load-data-btn" class="btn-primary">Load Data 🚀</button>
-                    <button id="reload-data-btn" class="btn-icon" title="Reload">🔄</button>
-                    <button id="disconnect-data-btn" class="btn-icon btn-danger" title="Disconnect"
-                        style="display: none;">🔌</button>
+                    <button id="load-data-btn" class="btn-primary btn-action-primary">
+                        <span class="btn-icon-emoji">🚀</span>
+                        <span class="btn-text">Load Data</span>
+                    </button>
+                    <button id="reload-data-btn" class="btn-secondary btn-action-secondary" title="Reload Data">
+                        <span class="btn-icon-emoji">🔄</span>
+                        <span class="btn-text">Reload</span>
+                    </button>
+                    <button id="save-datasource-btn" class="btn-secondary btn-action-secondary" title="Save Data Source" style="display: none;">
+                        <span class="btn-icon-emoji">💾</span>
+                        <span class="btn-text">Save</span>
+                    </button>
+                    <button id="disconnect-data-btn" class="btn-danger btn-action-danger" title="Disconnect Data Source" style="display: none;">
+                        <span class="btn-icon-emoji">🔌</span>
+                        <span class="btn-text">Disconnect</span>
+                    </button>
                 </div>
             </div>
             <div class="connection-status" id="connection-status">
@@ -42,15 +62,15 @@
         </details>
 
         <!-- Filters Section -->
-        <div class="sidebar-section">
-            <h4>Filters</h4>
+        <details class="sidebar-section" id="filters-details">
+            <summary>Filters</summary>
             <div class="filter-builder">
                 <button id="add-filter-btn" class="btn-secondary">+ Add Filter</button>
                 <div id="active-filters" class="active-filters-list">
                     <!-- Dynamic filters will be added here -->
                 </div>
             </div>
-        </div>
+        </details>
 
         <!-- Add Widget Section -->
         <div class="sidebar-section">
@@ -58,6 +78,7 @@
             <div class="widget-buttons">
                 <button id="add-chart-btn" class="btn-primary">📈 Add Chart</button>
                 <button id="add-table-btn" class="btn-primary">📋 Add Table</button>
+                <button id="add-report-btn" class="btn-secondary" style="display: none;">📄 Add Report</button>
             </div>
         </div>
     </aside>
@@ -66,12 +87,22 @@
     <main class="central-workspace">
         <div class="workspace-header">
             <h2 id="dashboard-title">My Dashboard</h2>
+            <div class="workspace-header-controls" style="display: flex; align-items: center; gap: 1rem;">
+                <div class="grid-config" style="display: none;">
+                    <label style="font-size: 0.9rem; color: var(--text-secondary, #666);">Grid:</label>
+                    <input type="number" id="grid-cols-input" min="1" max="24" value="12" style="width: 60px; padding: 0.25rem 0.5rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px;">
+                    <span style="color: var(--text-secondary, #666);">×</span>
+                    <input type="number" id="grid-rows-input" min="1" max="50" value="10" style="width: 60px; padding: 0.25rem 0.5rem; border: 1px solid var(--border-color, #e0e0e0); border-radius: 4px;">
+                    <button id="apply-grid-btn" class="btn-secondary" style="padding: 0.25rem 0.75rem; font-size: 0.85rem;">Apply</button>
+                </div>
+                <button id="save-dashboard-btn" class="btn-primary" style="display: none;">💾 Save Dashboard</button>
+            </div>
         </div>
         <div class="workspace-canvas" id="workspace-canvas">
             <!-- Widgets will be dynamically added here -->
             <div class="empty-canvas-message">
                 <div class="empty-message">
-                    <h3>🎯 Welcome to TablesAlive</h3>
+                    <h3><span class="welcome-icon">🎯</span> <span class="welcome-text">Welcome to TablesAlive</span></h3>
                     <p>Connect a data source and start adding charts and tables to build your dashboard!</p>
                 </div>
             </div>
@@ -106,6 +137,15 @@
 <div id="widget-templates" style="display: none;">
     <!-- Chart Widget Template -->
     <div class="widget chart-widget" data-type="chart">
+        <!-- Resize Handles -->
+        <div class="resize-handle corner top-left"></div>
+        <div class="resize-handle corner top-right"></div>
+        <div class="resize-handle corner bottom-left"></div>
+        <div class="resize-handle corner bottom-right"></div>
+        <div class="resize-handle edge top"></div>
+        <div class="resize-handle edge bottom"></div>
+        <div class="resize-handle edge left"></div>
+        <div class="resize-handle edge right"></div>
         <div class="widget-header">
             <h4 class="widget-title" id="chart-widget-title">Chart Widget</h4>
             <div class="widget-actions">
@@ -124,6 +164,15 @@
 
     <!-- Table Widget Template -->
     <div class="widget table-widget" data-type="table">
+        <!-- Resize Handles -->
+        <div class="resize-handle corner top-left"></div>
+        <div class="resize-handle corner top-right"></div>
+        <div class="resize-handle corner bottom-left"></div>
+        <div class="resize-handle corner bottom-right"></div>
+        <div class="resize-handle edge top"></div>
+        <div class="resize-handle edge bottom"></div>
+        <div class="resize-handle edge left"></div>
+        <div class="resize-handle edge right"></div>
         <div class="widget-header">
             <h4 class="widget-title" id="table-widget-title">Table Widget</h4>
             <div class="widget-actions">
@@ -135,6 +184,17 @@
             <div class="table-container">
                 <!-- Table rendered here -->
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Report Selection Modal -->
+<div class="modal-overlay" id="report-selection-modal" style="display: none;">
+    <div class="auth-modal" style="max-width: 600px; max-height: 80vh; overflow-y: auto;">
+        <button class="close-modal-btn" id="close-report-modal">✕</button>
+        <h2>Select a Report to Add</h2>
+        <div id="reports-selection-list" style="margin-top: 20px;">
+            <div class="loading-message">Loading reports...</div>
         </div>
     </div>
 </div>
